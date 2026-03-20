@@ -11,18 +11,38 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Mail, Lock, UserPlus, ShoppingBag, UserCog } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, UserPlus, ShoppingBag, UserCog, KeyRound, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { AuthProvider, useAuth } from '@/store/authContext';
 import toast from 'react-hot-toast';
 
 function RegisterContent() {
   const router = useRouter();
-  const { signUp, loading } = useAuth();
+  const { signUp, resetPassword, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await resetPassword(resetEmail);
+      setShowForgotModal(false);
+      setResetEmail('');
+    } catch {
+      // Error handled in context
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +171,18 @@ function RegisterContent() {
               </motion.button>
             </form>
 
+            {/* Forgot Password Link */}
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => { setResetEmail(email); setShowForgotModal(true); }}
+                className="text-sm text-cyan-600 hover:text-purple-600 font-medium transition-colors inline-flex items-center gap-1"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                Already have an account? Reset Password
+              </button>
+            </div>
+
             {/* Divider */}
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
@@ -203,6 +235,72 @@ function RegisterContent() {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-6"
+            onClick={() => setShowForgotModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center">
+                    <KeyRound className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">Reset Password</h2>
+                </div>
+                <button
+                  onClick={() => setShowForgotModal(false)}
+                  className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mb-5">
+                Enter your email address and we&apos;ll send you a link to reset your password.
+              </p>
+              <div className="relative mb-5">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="glass-input pl-12 pr-4 py-3.5 rounded-xl w-full"
+                  onKeyDown={(e) => e.key === 'Enter' && handleForgotPassword()}
+                />
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleForgotPassword}
+                disabled={resetLoading}
+                className="w-full py-3.5 rounded-xl font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {resetLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4" />
+                    Send Reset Link
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

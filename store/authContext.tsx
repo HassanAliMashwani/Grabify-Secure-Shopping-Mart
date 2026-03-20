@@ -21,6 +21,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/database/firebaseConfig';
@@ -40,6 +41,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, role?: 'admin' | 'user') => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -187,6 +189,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Reset password
+  const resetPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success('Password reset email sent! Check your inbox.');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send reset email';
+      toast.error(errorMessage);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     firebaseUser,
     userData,
@@ -194,6 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signIn,
     signOut,
+    resetPassword,
     isAdmin: userData?.role === 'admin',
   };
 
