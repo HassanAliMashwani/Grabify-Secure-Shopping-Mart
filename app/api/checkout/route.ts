@@ -32,9 +32,14 @@ import { db } from '@/database/firebaseConfig';
 // Server-side DLL secret
 const DLL_SECRET = process.env.DLL_SECRET || '';
 
+type FirestoreTimestampLike = {
+  toMillis?: () => number;
+};
+
 type OrderDoc = {
   docId: string;
-  timestamp?: { toMillis?: () => number };
+  timestamp?: FirestoreTimestampLike;
+  createdAt?: FirestoreTimestampLike;
   [key: string]: unknown;
 };
 
@@ -351,12 +356,8 @@ export async function GET(request: NextRequest) {
     
     // Sort by timestamp descending
     orders.sort((a, b) => {
-      const aTs = (a as { timestamp?: { toMillis?: () => number } }).timestamp;
-      const bTs = (b as { timestamp?: { toMillis?: () => number } }).timestamp;
-
-      const aTime = aTs?.toMillis?.() ?? 0;
-      const bTime = bTs?.toMillis?.() ?? 0;
-
+      const aTime = a.timestamp?.toMillis?.() ?? a.createdAt?.toMillis?.() ?? 0;
+      const bTime = b.timestamp?.toMillis?.() ?? b.createdAt?.toMillis?.() ?? 0;
       return bTime - aTime;
     });
     
