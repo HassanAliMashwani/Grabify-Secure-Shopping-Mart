@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 /**
  * ============================================================================
  * PRODUCTS PAGE - Light Theme
@@ -8,7 +11,7 @@
  * ============================================================================
  */
 
-import { useEffect, useState, useCallback, useMemo, memo } from 'react';
+import { useEffect, useState, useCallback, useMemo, memo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Loader2, ShoppingBag, Database, Plus, ChevronDown, X, Laptop, Shirt, Home, Dumbbell, BookOpen, Grid3X3 } from 'lucide-react';
@@ -587,7 +590,13 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <AuthProvider>
-      <ProductsContent />
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-12 h-12 text-cyan-500 animate-spin" />
+        </div>
+      }>
+        <ProductsContent />
+      </Suspense>
     </AuthProvider>
   );
 }
