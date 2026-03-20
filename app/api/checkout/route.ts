@@ -32,13 +32,13 @@ import { db } from '@/database/firebaseConfig';
 // Server-side DLL secret
 const DLL_SECRET = process.env.DLL_SECRET || '';
 
-interface Order {
+interface CheckoutOrder {
   id: string;
   userId: string;
   total: number;
   status: string;
-  timestamp: Timestamp;
-  createdAt: Timestamp;
+  timestamp: any;
+  createdAt: any;
   [key: string]: any;
 }
 
@@ -351,10 +351,10 @@ export async function GET(request: NextRequest) {
     const orders = ordersSnapshot.docs.map(doc => ({
       ...(doc.data() as any),
       docId: doc.id,
-    })) as (Order & { docId: string })[];
+    })) as (CheckoutOrder & { docId: string })[];
     
     // Sort by timestamp descending
-    orders.sort((a, b) => {
+    orders.sort((a: any, b: any) => {
       const aTime = a.timestamp?.toMillis?.() || 0;
       const bTime = b.timestamp?.toMillis?.() || 0;
       return bTime - aTime;
