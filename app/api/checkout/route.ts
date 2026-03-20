@@ -25,6 +25,7 @@ import {
   query,
   where,
   deleteDoc,
+  orderBy,
   Timestamp 
 } from 'firebase/firestore';
 import { db } from '@/database/firebaseConfig';
@@ -343,7 +344,8 @@ export async function GET(request: NextRequest) {
     
     const ordersQuery = query(
       collection(db, 'orders'),
-      where('userId', '==', userId)
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc')
     );
     
     const ordersSnapshot = await getDocs(ordersQuery);
@@ -351,14 +353,7 @@ export async function GET(request: NextRequest) {
     const orders = ordersSnapshot.docs.map(doc => ({
       ...(doc.data() as any),
       docId: doc.id,
-    })) as (CheckoutOrder & { docId: string })[];
-    
-    // Sort by timestamp descending
-    orders.sort((a: any, b: any) => {
-      const aTime = a.timestamp?.toMillis?.() || 0;
-      const bTime = b.timestamp?.toMillis?.() || 0;
-      return bTime - aTime;
-    });
+    }));
     
     return NextResponse.json({
       success: true,
