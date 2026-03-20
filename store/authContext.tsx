@@ -68,8 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const data = userSnap.data();
             const userData: UserData = {
               uid: user.uid,
-              email: data.email,
-              role: data.role,
+              email: data?.email || '',
+              role: data?.role || 'user',
             };
             setUserData(userData);
             setUser(userData);

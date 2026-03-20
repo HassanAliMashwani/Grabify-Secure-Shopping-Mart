@@ -32,6 +32,16 @@ import { db } from '@/database/firebaseConfig';
 // Server-side DLL secret
 const DLL_SECRET = process.env.DLL_SECRET || '';
 
+interface Order {
+  id: string;
+  userId: string;
+  total: number;
+  status: string;
+  timestamp: Timestamp;
+  createdAt: Timestamp;
+  [key: string]: any;
+}
+
 /**
  * Generate unique order ID
  */
@@ -338,11 +348,10 @@ export async function GET(request: NextRequest) {
     
     const ordersSnapshot = await getDocs(ordersQuery);
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orders = ordersSnapshot.docs.map(doc => ({
-      ...(doc.data() as Record<string, any>),
+      ...(doc.data() as any),
       docId: doc.id,
-    }));
+    })) as (Order & { docId: string })[];
     
     // Sort by timestamp descending
     orders.sort((a, b) => {

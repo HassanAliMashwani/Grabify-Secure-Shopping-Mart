@@ -173,7 +173,7 @@ export async function GET() {
     message: 'Use POST to seed the database with sample products. Use POST ?reset=true to replace existing products.',
     totalProducts: sampleProducts.length,
     productsPerCategory: 2,
-    categories: [...new Set(sampleProducts.map(p => p.category))],
+    categories: Array.from(new Set(sampleProducts.map(p => p.category))),
     productsByCategory: byCategory,
   });
 }
