@@ -25,7 +25,6 @@ import {
   query,
   where,
   deleteDoc,
-  orderBy,
   Timestamp 
 } from 'firebase/firestore';
 import { db } from '@/database/firebaseConfig';
@@ -33,15 +32,16 @@ import { db } from '@/database/firebaseConfig';
 // Server-side DLL secret
 const DLL_SECRET = process.env.DLL_SECRET || '';
 
-interface CheckoutOrder {
-  id: string;
-  userId: string;
-  total: number;
-  status: string;
-  timestamp: any;
-  createdAt: any;
+type FirestoreTimestampLike = {
+  toMillis?: () => number;
+};
+
+type OrderDoc = {
+  docId: string;
+  timestamp?: FirestoreTimestampLike;
+  createdAt?: FirestoreTimestampLike;
   [key: string]: any;
-}
+};
 
 /**
  * Generate unique order ID
@@ -344,16 +344,25 @@ export async function GET(request: NextRequest) {
     
     const ordersQuery = query(
       collection(db, 'orders'),
-      where('userId', '==', userId),
-      orderBy('timestamp', 'desc')
+      where('userId', '==', userId)
     );
     
     const ordersSnapshot = await getDocs(ordersQuery);
     
-    const orders = ordersSnapshot.docs.map(doc => ({
-      ...(doc.data() as any),
-      docId: doc.id,
-    }));
+    const orders: OrderDoc[] = ordersSnapshot.docs.map((doc) => {
+      const data = doc.data() as Record<string, unknown>;
+      return {
+        docId: doc.id,
+        ...data,
+      } as OrderDoc;
+    });
+    
+    // Sort by timestamp descending safely
+    orders.sort((a, b) => {
+      const aTime = a.timestamp?.toMillis?.() ?? a.createdAt?.toMillis?.() ?? 0;
+      const bTime = b.timestamp?.toMillis?.() ?? b.createdAt?.toMillis?.() ?? 0;
+      return bTime - aTime;
+    });
     
     return NextResponse.json({
       success: true,
