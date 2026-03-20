@@ -338,8 +338,9 @@ export async function GET(request: NextRequest) {
     
     const ordersSnapshot = await getDocs(ordersQuery);
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orders = ordersSnapshot.docs.map(doc => ({
-      ...doc.data(),
+      ...(doc.data() as Record<string, any>),
       docId: doc.id,
     }));
     
