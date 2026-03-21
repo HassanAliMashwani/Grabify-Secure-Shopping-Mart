@@ -10,6 +10,7 @@
 
 import { useState, memo } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Plus, Minus, Star } from 'lucide-react';
 import { useStore, Product } from '@/store/useStore';
@@ -24,12 +25,14 @@ interface ProductCardProps {
 
 const ProductCard = memo(function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
+  const router = useRouter();
   const { addToCart, setCartOpen } = useStore();
   const { userData } = useAuth();
 
   const handleAddToCart = () => {
     if (!userData) {
       toast.error('Please sign in to add items to cart');
+      router.push('/login?callbackUrl=/products');
       return;
     }
     
@@ -54,9 +57,9 @@ const ProductCard = memo(function ProductCard({ product, index = 0 }: ProductCar
       transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.3) }}
       className="group"
     >
-      <div className="glass-card rounded-3xl overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-2">
+      <div className="glass-card rounded-3xl overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
         {/* Image Container */}
-        <div className="relative h-52 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+        <div className="relative h-52 aspect-square w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
           {/* Category Badge */}
           <div className="absolute top-4 left-4 z-10">
             <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-sm text-cyan-600 shadow-soft">
@@ -96,7 +99,7 @@ const ProductCard = memo(function ProductCard({ product, index = 0 }: ProductCar
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4 bg-white">
+        <div className="p-5 flex flex-col flex-1 space-y-4 bg-white">
           {/* Title & Rating */}
           <div>
             <h3 className="text-lg font-bold text-gray-800 group-hover:text-cyan-600 transition-colors line-clamp-1">
@@ -149,13 +152,12 @@ const ProductCard = memo(function ProductCard({ product, index = 0 }: ProductCar
             </div>
           </div>
 
-          {/* Add to Cart Button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="w-full py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-md hover:shadow-lg"
+            className="w-full py-4 mt-auto rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-md hover:shadow-lg"
           >
             <ShoppingCart className="w-5 h-5" />
             {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}

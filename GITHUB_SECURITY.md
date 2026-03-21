@@ -59,7 +59,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 DLL_SECRET=your_secret_here
 
 # Admin Secret Code
-ADMIN_SECRET_CODE=GRABIFY_ADMIN_2025
+ADMIN_SECRET_KEY=your_secure_admin_key_here
 ```
 
 **Important**: Never commit `.env` files!

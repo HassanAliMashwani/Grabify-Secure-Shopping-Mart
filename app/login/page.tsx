@@ -8,9 +8,9 @@
  * ============================================================================
  */
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, LogIn, ShoppingBag, UserCog, Sparkles, KeyRound, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -19,6 +19,8 @@ import toast from 'react-hot-toast';
 
 function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/products';
   const { signIn, resetPassword, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,7 +55,7 @@ function LoginContent() {
 
     try {
       await signIn(email, password);
-      router.push('/products');
+      router.push(callbackUrl);
     } catch {
       // Error is handled in AuthContext
     }
@@ -191,23 +193,6 @@ function LoginContent() {
             </div>
           </div>
 
-          {/* Info Box */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-cyan-50 to-purple-50 border border-cyan-100"
-          >
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="text-cyan-700 font-medium">Admin Access</p>
-                <p className="text-gray-500 mt-1">
-                  Use secret code <code className="bg-white px-2 py-0.5 rounded text-xs font-mono text-purple-600">GRABIFY_ADMIN_2025</code> during admin registration
-                </p>
-              </div>
-            </div>
-          </motion.div>
         </motion.div>
       </div>
 
@@ -280,10 +265,17 @@ function LoginContent() {
   );
 }
 
+
 export default function LoginPage() {
   return (
     <AuthProvider>
-      <LoginContent />
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }>
+        <LoginContent />
+      </Suspense>
     </AuthProvider>
   );
 }

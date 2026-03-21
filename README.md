@@ -97,9 +97,7 @@ A modern, secure e-commerce platform built for the Web Development Competition.
 - Full access to product management & logs
 
 ### 🔑 Admin Secret Code
-```
-GRABIFY_ADMIN_2025
-```
+The admin secret code is now managed via the `ADMIN_SECRET_KEY` environment variable for enhanced security.
 
 ## 🔐 DLL Security Implementation
 
@@ -196,7 +194,7 @@ export const ProductSchema = z.object({
 
 ### Quick Setup
 
-1. **Register as Admin**: Go to `/admin/register` and use code `GRABIFY_ADMIN_2025`
+1. **Register as Admin**: Go to `/admin/register` and use your configured admin secret code.
 2. **Add Products**: Go to `/products` and click "Seed Products" OR go to `/admin` to add manually
 3. **Test Shopping**: Register a customer account at `/register` and try the full flow
 

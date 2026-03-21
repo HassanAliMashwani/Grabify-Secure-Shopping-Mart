@@ -16,10 +16,6 @@ import { Mail, Lock, UserPlus, Shield, Key, ShoppingBag } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { AuthProvider, useAuth } from '@/store/authContext';
 import toast from 'react-hot-toast';
-
-// Admin secret code for registration
-const ADMIN_SECRET_CODE = 'GRABIFY_ADMIN_2025';
-
 function AdminRegisterContent() {
   const router = useRouter();
   const { signUp, loading } = useAuth();
@@ -36,8 +32,21 @@ function AdminRegisterContent() {
       return;
     }
 
-    if (secretCode !== ADMIN_SECRET_CODE) {
-      toast.error('Invalid admin secret code');
+    // Verify secret code via API
+    try {
+      const verifyRes = await fetch('/api/auth/verify-secret', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secretCode }),
+      });
+
+      if (!verifyRes.ok) {
+        toast.error('Invalid admin secret code');
+        return;
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      toast.error('Failed to verify secret code');
       return;
     }
 
